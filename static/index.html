@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Azure Local Releases API</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            line-height: 1.6;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .logo {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 1rem;
+            background: linear-gradient(135deg, #0078d4, #106ebe);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .endpoint {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        .endpoint h3 {
+            margin-top: 0;
+            color: #0078d4;
+        }
+        .endpoint code {
+            background: #e9ecef;
+            padding: 0.2em 0.4em;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+        .example {
+            margin-top: 0.5rem;
+        }
+        .example a {
+            color: #0078d4;
+            text-decoration: none;
+        }
+        .example a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">AL</div>
+        <h1>Azure Local Releases API</h1>
+        <p>REST API for Azure Local release information with advanced filtering and caching</p>
+    </div>
+
+    <div class="endpoint">
+        <h3>GET /api/releases</h3>
+        <p>Get Azure Local releases with optional filtering</p>
+        <p><strong>Query Parameters:</strong></p>
+        <ul>
+            <li><code>supported</code> - Filter by support status (true/false)</li>
+            <li><code>releaseTrain</code> - Filter by release train (e.g., 2411, 2505)</li>
+            <li><code>buildType</code> - Filter by build type (Feature, Cumulative)</li>
+            <li><code>limit</code> - Limit number of results</li>
+            <li><code>offset</code> - Offset for pagination</li>
+        </ul>
+        <div class="example">
+            <strong>Examples:</strong><br>
+            <a href="/api/releases">/api/releases</a> - All releases<br>
+            <a href="/api/releases?supported=true&limit=10">/api/releases?supported=true&limit=10</a> - Latest 10 supported releases<br>
+            <a href="/api/releases?releaseTrain=2505">/api/releases?releaseTrain=2505</a> - All releases from 2505 train
+        </div>
+    </div>
+
+    <div class="endpoint">
+        <h3>GET /api/releasetrains</h3>
+        <p>Get Azure Local release trains information</p>
+        <p><strong>Query Parameters:</strong></p>
+        <ul>
+            <li><code>supported</code> - Filter by support status (true/false)</li>
+            <li><code>limit</code> - Limit number of results</li>
+            <li><code>offset</code> - Offset for pagination</li>
+        </ul>
+        <div class="example">
+            <strong>Examples:</strong><br>
+            <a href="/api/releasetrains">/api/releasetrains</a> - All release trains<br>
+            <a href="/api/releasetrains?supported=true">/api/releasetrains?supported=true</a> - Supported release trains
+        </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 2rem; color: #666;">
+        <p>Built with ❤️ using Cloudflare Functions</p>
+    </div>
+</body>
+</html>

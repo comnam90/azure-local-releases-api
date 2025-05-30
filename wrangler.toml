@@ -1,0 +1,19 @@
+name = "azure-local-releases-api"
+compatibility_date = "2024-12-01"
+pages_build_output_dir = "static"
+
+[env.production.vars]
+ENVIRONMENT = "production"
+
+[env.preview.vars]
+ENVIRONMENT = "preview"
+
+[[env.production.kv_namespaces]]
+binding = "CACHE"
+preview_id = "16db018ddd674e55ba1c70d552cb8d53"
+id = "6de4baa56fa0439d84111a34c4820f40"
+
+[[env.preview.kv_namespaces]]
+binding = "CACHE"
+preview_id = "16db018ddd674e55ba1c70d552cb8d53"
+id = "fdd017706f434551836dbae8c90f5565"
