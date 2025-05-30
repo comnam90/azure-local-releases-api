@@ -4,7 +4,7 @@
 A fully functional serverless REST API built with Cloudflare Pages Functions that provides comprehensive Azure Local release information with advanced filtering capabilities.
 
 ## 🚀 Live Deployment
-**Production URL**: https://phase-1.azure-local-releases-api.pages.dev/
+**Production URL**: https://phase-2.azure-local-releases-api.pages.dev/
 
 ## 📊 Key Metrics
 - **26 Releases** parsed and available via API
@@ -209,22 +209,22 @@ id = "your-kv-namespace-id"
 
 ### Get Latest Releases
 ```bash
-curl "https://phase-1.azure-local-releases-api.pages.dev/api/releases?limit=5"
+curl "https://phase-2.azure-local-releases-api.pages.dev/api/releases?limit=5"
 ```
 
 ### Get Supported Releases for New Deployments
 ```bash
-curl "https://phase-1.azure-local-releases-api.pages.dev/api/releases?supported=true&newDeployments=true"
+curl "https://phase-2.azure-local-releases-api.pages.dev/api/releases?supported=true&newDeployments=true"
 ```
 
 ### Get Specific Release Train
 ```bash
-curl "https://phase-1.azure-local-releases-api.pages.dev/api/releases?releaseTrain=2505"
+curl "https://phase-2.azure-local-releases-api.pages.dev/api/releases?releaseTrain=2505"
 ```
 
 ### Get Release Trains
 ```bash
-curl "https://phase-1.azure-local-releases-api.pages.dev/api/releasetrains"
+curl "https://phase-2.azure-local-releases-api.pages.dev/api/releasetrains"
 ```
 
 ## 🏗 Project Structure
@@ -349,7 +349,7 @@ azure-local-releases-api/
 ## 📞 Contact & Support
 
 For questions, issues, or feature requests:
-- **API Documentation**: https://phase-1.azure-local-releases-api.pages.dev/
+- **API Documentation**: https://phase-2.azure-local-releases-api.pages.dev/
 - **Source Code**: Available in workspace
 - **Issues**: Report via project management system
 
