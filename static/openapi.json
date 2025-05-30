@@ -1,0 +1,525 @@
+{
+  "openapi": "3.1.0",
+  "jsonSchemaDialect": "https://spec.openapis.org/oas/3.1/dialect/base",
+  "info": {
+    "license": {
+      "name": "MIT"
+    },
+    "title": "Azure Local Releases API",
+    "version": "1.0.0",
+    "description": "A comprehensive REST API for retrieving Azure Local release information, including versions, support status, deployment compatibility, and solution updates. This API aggregates data from Microsoft documentation and provides advanced filtering capabilities for programmatic access to Azure Local release data.",
+    "contact": {
+      "name": "Ben Thomas",
+      "url": "https://bcthomas.com"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://azure-local-releases-api.pages.dev",
+      "description": "Production API server"
+    },
+    {
+      "url": "https://phase-2.azure-local-releases-api.pages.dev",
+      "description": "Phase 2 dev server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Releases",
+      "description": "Azure Local release information with comprehensive filtering and metadata"
+    },
+    {
+      "name": "ReleaseTrains",
+      "description": "Azure Local release train groupings and support status"
+    }
+  ],
+  "paths": {
+    "/api/releases": {
+      "get": {
+        "tags": ["Releases"],
+        "summary": "Retrieve Azure Local Releases",
+        "description": "Get a comprehensive list of Azure Local releases with support for advanced filtering. Returns detailed information including version numbers, support status, deployment compatibility, and solution update links.",
+        "parameters": [
+          {
+            "name": "supported",
+            "in": "query",
+            "description": "Filter by support status (true for currently supported releases, false for end-of-support)",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "releaseTrain",
+            "in": "query",
+            "description": "Filter by release train (e.g., '2408', '2411', '2505')",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9]{4}$"
+            }
+          },
+          {
+            "name": "baselineRelease",
+            "in": "query",
+            "description": "Filter for baseline releases that can be used for new deployments",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "buildType",
+            "in": "query",
+            "description": "Filter by build type (Feature builds are first in release train, Cumulative are subsequent)",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["Feature", "Cumulative"]
+            }
+          },
+          {
+            "name": "version",
+            "in": "query",
+            "description": "Filter by exact version number (e.g., '11.2505.1001.22')",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "osBuild",
+            "in": "query",
+            "description": "Filter by OS build number (eg. 25398.1611)",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "newDeployments",
+            "in": "query",
+            "description": "Filter for releases compatible with new deployments (true) or existing deployments only (false)",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "solutionUpdate",
+            "in": "query",
+            "description": "Filter for releases with downloadable solution update packages (true means solution update is available)",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "latest",
+            "in": "query",
+            "description": "Retrieve only the latest release (overall, or per release train if releaseTrain is specified)",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with Azure Local releases",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReleasesResponse"
+                },
+                "examples": {
+                  "latest_supported": {
+                    "summary": "Latest supported releases",
+                    "description": "Example response for latest supported releases across all release trains",
+                    "value": {
+                      "releases": [
+                        {
+                          "version": "11.2505.1001.22",
+                          "availabilityDate": "2025-05-28",
+                          "newDeployments": false,
+                          "osBuild": "25398.1611",
+                          "releaseTrain": "2505",
+                          "release": "2505.1001.22",
+                          "releaseShortened": "2505.1001",
+                          "baselineRelease": true,
+                          "buildType": "Feature",
+                          "endOfSupportDate": "2025-11-24",
+                          "supported": true,
+                          "solutionUpdate": {
+                            "uri": "https://azurestackreleases.download.prss.microsoft.com/dbazure/AzureLocal/CombinedSolutionBundle/11.2505.1001.22/CombinedSolutionBundle.11.2505.1001.22.zip",
+                            "fileHash": "AB2C7CE74168BF9FD679E7CE644BC57A20A0A3A418C5E8663EBCF53FC0B45113"
+                          },
+                          "urls": {
+                            "security": "https://learn.microsoft.com/en-us/azure/azure-local/security-update/security-update?view=azloc-2505&preserve-view=true",
+                            "news": "https://learn.microsoft.com/en-us/azure/azure-local/whats-new?view=azloc-2505&preserve-view=true#features-and-improvements-in-2505",
+                            "issues": "https://learn.microsoft.com/en-us/azure/azure-local/known-issues?view=azloc-2505&preserve-view=true"
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  "feature_builds": {
+                    "summary": "Feature builds only",
+                    "description": "Example response filtering for Feature builds only",
+                    "value": {
+                      "releases": [
+                        {
+                          "version": "11.2505.1001.22",
+                          "availabilityDate": "2025-05-28",
+                          "newDeployments": false,
+                          "osBuild": "25398.1611",
+                          "releaseTrain": "2505",
+                          "release": "2505.1001.22",
+                          "releaseShortened": "2505.1001",
+                          "baselineRelease": true,
+                          "buildType": "Feature",
+                          "endOfSupportDate": "2025-11-24",
+                          "supported": true,
+                          "solutionUpdate": {
+                            "uri": "https://azurestackreleases.download.prss.microsoft.com/dbazure/AzureLocal/CombinedSolutionBundle/11.2505.1001.22/CombinedSolutionBundle.11.2505.1001.22.zip",
+                            "fileHash": "AB2C7CE74168BF9FD679E7CE644BC57A20A0A3A418C5E8663EBCF53FC0B45113"
+                          },
+                          "urls": {
+                            "security": "https://learn.microsoft.com/en-us/azure/azure-local/security-update/security-update?view=azloc-2505&preserve-view=true",
+                            "news": "https://learn.microsoft.com/en-us/azure/azure-local/whats-new?view=azloc-2505&preserve-view=true#features-and-improvements-in-2505",
+                            "issues": "https://learn.microsoft.com/en-us/azure/azure-local/known-issues?view=azloc-2505&preserve-view=true"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - invalid query parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/releasetrains": {
+      "get": {
+        "tags": ["ReleaseTrains"],
+        "summary": "Retrieve Azure Local Release Trains",
+        "description": "Get a simplified list of unique Azure Local release train versions with their support status. Release trains represent major versioning groups (e.g., 2408, 2411, 2505).",
+        "parameters": [
+          {
+            "name": "supported",
+            "in": "query",
+            "description": "Filter by support status (true for currently supported release trains)",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "example": true
+          },
+          {
+            "name": "releaseTrain",
+            "in": "query",
+            "description": "Filter by specific release train (e.g., '2408', '2411', '2505')",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^[0-9]{4}$"
+            },
+            "example": "2505"
+          },
+          {
+            "name": "latest",
+            "in": "query",
+            "description": "Retrieve only the latest release train",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            },
+            "example": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with Azure Local release trains",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReleaseTrainsResponse"
+                },
+                "examples": {
+                  "all_trains": {
+                    "summary": "All release trains",
+                    "description": "Example response showing all available release trains",
+                    "value": {
+                      "releaseTrains": [
+                        {
+                          "releaseTrain": "2505",
+                          "supported": true
+                        },
+                        {
+                          "releaseTrain": "2504",
+                          "supported": true
+                        },
+                        {
+                          "releaseTrain": "2503",
+                          "supported": true
+                        }
+                      ]
+                    }
+                  },
+                  "latest_only": {
+                    "summary": "Latest release train only",
+                    "description": "Example response when filtering for latest release train",
+                    "value": {
+                      "releaseTrains": [
+                        {
+                          "releaseTrain": "2505",
+                          "supported": true
+                        }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - invalid query parameters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Release": {
+        "type": "object",
+        "description": "A single Azure Local release with comprehensive metadata",
+        "required": [
+          "version",
+          "availabilityDate",
+          "newDeployments",
+          "osBuild",
+          "releaseTrain",
+          "release",
+          "releaseShortened",
+          "baselineRelease",
+          "buildType",
+          "supported",
+          "solutionUpdate",
+          "urls"
+        ],
+        "properties": {
+          "version": {
+            "type": "string",
+            "description": "Full version number including OS version prefix",
+            "example": "11.2505.1001.22"
+          },
+          "availabilityDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Date when the release became available (ISO 8601 format)",
+            "example": "2025-05-28"
+          },
+          "newDeployments": {
+            "type": "boolean",
+            "description": "Whether this release can be used for new Azure Local deployments",
+            "example": false
+          },
+          "osBuild": {
+            "type": "string",
+            "description": "Operating system build number",
+            "example": "25398.1611"
+          },
+          "releaseTrain": {
+            "type": "string",
+            "description": "Release train identifier (YYMM format)",
+            "pattern": "^[0-9]{4}$",
+            "example": "2505"
+          },
+          "release": {
+            "type": "string",
+            "description": "Release identifier without OS version prefix",
+            "example": "2505.1001.22"
+          },
+          "releaseShortened": {
+            "type": "string",
+            "description": "Shortened release identifier (train.build format)",
+            "example": "2505.1001"
+          },
+          "baselineRelease": {
+            "type": "boolean",
+            "description": "Whether this is a baseline release suitable for new deployments",
+            "example": true
+          },
+          "buildType": {
+            "type": "string",
+            "enum": ["Feature", "Cumulative"],
+            "description": "Build type - Feature (first in train) or Cumulative (subsequent)",
+            "example": "Feature"
+          },
+          "endOfSupportDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Date when support ends (180 days from availability), may be null for older releases",
+            "example": "2025-11-24",
+            "nullable": true
+          },
+          "supported": {
+            "type": "boolean",
+            "description": "Current support status (true if within 180-day support window)",
+            "example": true
+          },
+          "solutionUpdate": {
+            "$ref": "#/components/schemas/SolutionUpdate"
+          },
+          "urls": {
+            "$ref": "#/components/schemas/ReleaseUrls"
+          }
+        }
+      },
+      "SolutionUpdate": {
+        "type": "object",
+        "description": "Solution update package information (may be empty if no package available)",
+        "properties": {
+          "uri": {
+            "type": "string",
+            "format": "uri",
+            "description": "Download URL for the solution update package",
+            "example": "https://azurestackreleases.download.prss.microsoft.com/dbazure/AzureLocal/CombinedSolutionBundle/11.2505.1001.22/CombinedSolutionBundle.11.2505.1001.22.zip"
+          },
+          "fileHash": {
+            "type": "string",
+            "description": "SHA256 hash of the solution update package",
+            "example": "AB2C7CE74168BF9FD679E7CE644BC57A20A0A3A418C5E8663EBCF53FC0B45113"
+          }
+        }
+      },
+      "ReleaseUrls": {
+        "type": "object",
+        "description": "Microsoft Learn documentation URLs for the release",
+        "required": ["security", "news", "issues"],
+        "properties": {
+          "security": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL to security update documentation",
+            "example": "https://learn.microsoft.com/en-us/azure/azure-local/security-update/security-update?view=azloc-2505&preserve-view=true"
+          },
+          "news": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL to what's new documentation",
+            "example": "https://learn.microsoft.com/en-us/azure/azure-local/whats-new?view=azloc-2505&preserve-view=true#features-and-improvements-in-2505"
+          },
+          "issues": {
+            "type": "string",
+            "format": "uri",
+            "description": "URL to known issues documentation",
+            "example": "https://learn.microsoft.com/en-us/azure/azure-local/known-issues?view=azloc-2505&preserve-view=true"
+          }
+        }
+      },
+      "ReleaseTrain": {
+        "type": "object",
+        "description": "A release train with its support status",
+        "required": ["releaseTrain", "supported"],
+        "properties": {
+          "releaseTrain": {
+            "type": "string",
+            "description": "Release train identifier (YYMM format)",
+            "pattern": "^[0-9]{4}$",
+            "example": "2505"
+          },
+          "supported": {
+            "type": "boolean",
+            "description": "Whether any releases in this train are currently supported",
+            "example": true
+          }
+        }
+      },
+      "ReleasesResponse": {
+        "type": "object",
+        "description": "Response object containing an array of releases",
+        "required": ["releases"],
+        "properties": {
+          "releases": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Release"
+            },
+            "description": "Array of Azure Local releases matching the query criteria"
+          }
+        }
+      },
+      "ReleaseTrainsResponse": {
+        "type": "object",
+        "description": "Response object containing an array of release trains",
+        "required": ["releaseTrains"],
+        "properties": {
+          "releaseTrains": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReleaseTrain"
+            },
+            "description": "Array of Azure Local release trains matching the query criteria"
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "description": "Error response object",
+        "required": ["error", "message"],
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "Error type or code",
+            "example": "ValidationError"
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable error message",
+            "example": "Invalid query parameter: buildType must be either 'Feature' or 'Cumulative'"
+          }
+        }
+      }
+    }
+  }
+}
