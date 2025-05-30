@@ -12,6 +12,9 @@ export class DataTransformer {
   ): Release[] {
     const releases: Release[] = [];
 
+    // First, determine which releases are Feature builds (first in each release train)
+    const featureBuilds = DataTransformer.determineFeatureBuilds(releaseData);
+
     for (const release of releaseData) {
       // Find matching solution update data
       const solutionUpdate = solutionData.find(su => su.osBuild === release.osBuild);
@@ -27,8 +30,8 @@ export class DataTransformer {
       // Determine baseline release status
       const baselineRelease = DataParser.isBaselineRelease(release.version);
       
-      // Determine build type
-      const buildType = DataParser.getBuildType(release.version);
+      // Determine build type based on whether this is the first release in the train
+      const buildType = featureBuilds.has(release.version) ? 'Feature' : 'Cumulative';
       
       // Calculate support status and end of support date
       const { supported, endOfSupportDate } = DataTransformer.calculateSupportStatus(
@@ -155,5 +158,30 @@ export class DataTransformer {
     return releaseTrains
       .filter(rt => rt.supported)
       .sort((a, b) => parseInt(b.releaseTrain) - parseInt(a.releaseTrain))[0];
+  }
+
+  /**
+   * Determine which releases are Feature builds (first in each release train)
+   */
+  static determineFeatureBuilds(releaseData: ExternalReleaseData[]): Set<string> {
+    const featureBuilds = new Set<string>();
+    const trainMap = new Map<string, ExternalReleaseData>();
+
+    // Find the earliest release in each release train
+    for (const release of releaseData) {
+      const releaseTrain = DataParser.extractReleaseTrain(release.version);
+      const existing = trainMap.get(releaseTrain);
+      
+      if (!existing || new Date(release.availabilityDate) < new Date(existing.availabilityDate)) {
+        trainMap.set(releaseTrain, release);
+      }
+    }
+
+    // Mark the earliest release in each train as a Feature build
+    for (const release of trainMap.values()) {
+      featureBuilds.add(release.version);
+    }
+
+    return featureBuilds;
   }
 }
