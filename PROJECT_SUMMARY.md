@@ -4,7 +4,7 @@
 A fully functional serverless REST API built with Cloudflare Pages Functions that provides comprehensive Azure Local release information with advanced filtering capabilities.
 
 ## 🚀 Live Deployment
-**Production URL**: https://6c277123.azure-local-releases-api.pages.dev/
+**Production URL**: https://phase-1.azure-local-releases-api.pages.dev/
 
 ## 📊 Key Metrics
 - **26 Releases** parsed and available via API
@@ -43,14 +43,14 @@ GET /api/releases
     {
       "version": "11.2505.1001.22",
       "availabilityDate": "2025-05-28",
-      "newDeployments": true,
+      "newDeployments": false,
       "osBuild": "25398.1611",
       "releaseTrain": "2505",
       "release": "2505.1001.22",
       "releaseShortened": "2505.1001",
       "baselineRelease": true,
-      "buildType": "Cumulative",
-      "endOfSupportDate": "2025-10-31",
+      "buildType": "Feature",
+      "endOfSupportDate": "2025-11-24",
       "supported": true,
       "solutionUpdate": {
         "uri": "https://azurestackreleases.download.prss.microsoft.com/...",
@@ -94,12 +94,16 @@ GET /api/releasetrains
 
 2. **Data Parsing** (`functions/lib/data-parser.ts`)
    - HTML parsing with Cheerio for release table data
+   - **NEW**: Comprehensive parsing of "Older versions of Azure Local" table
+   - Tab panel detection for new vs existing deployment compatibility
    - Markdown table parsing for solution updates
    - Robust error handling and data validation
 
 3. **Data Transformation** (`functions/lib/data-transformer.ts`)
    - Converts raw data to standardized API format
-   - Calculates support status based on end-of-support dates
+   - **NEW**: Dynamic 180-day support status calculation from availability dates
+   - **NEW**: Enhanced build type classification (Feature vs Cumulative) 
+   - **NEW**: OS version detection and release train grouping
    - Enriches data with additional metadata
 
 4. **Filtering System** (`functions/lib/filters.ts`)
@@ -111,6 +115,32 @@ GET /api/releasetrains
    - Cloudflare KV storage with TTL support
    - Intelligent cache invalidation
    - Fallback to live data on cache miss
+
+## 🔧 Recent Critical Fixes & Improvements
+
+### Major Data Coverage Enhancement ✅
+**Issue Resolved**: Missing "Older versions of Azure Local" table parsing
+- **Before**: Only 8 releases captured from tab panels
+- **After**: Complete 26 releases including all historical data
+- **Impact**: Full release history from 2311 to 2505 release trains
+
+### Support Status Calculation ✅
+**Issue Resolved**: Fixed date calculation from hardcoded to dynamic
+- **Before**: Fixed end-of-support date (October 31, 2025)
+- **After**: Dynamic 180-day window calculation from availability date
+- **Impact**: Accurate real-time support status for all releases
+
+### New Deployments Detection ✅  
+**Issue Resolved**: Improved deployment compatibility detection
+- **Before**: Version-prefix based logic (unreliable)
+- **After**: HTML tab section parsing (`#tabpanel_1_new-deployments` vs `#tabpanel_1_existing-deployments`)
+- **Impact**: Precise deployment compatibility flags per Microsoft documentation
+
+### Build Type Classification ✅
+**Issue Resolved**: Enhanced Feature build identification
+- **Before**: Simple build number heuristics
+- **After**: Comprehensive OS version + release train grouping logic
+- **Impact**: Accurate Feature vs Cumulative build type classification
 
 ## 🧪 Testing Strategy
 
@@ -179,22 +209,22 @@ id = "your-kv-namespace-id"
 
 ### Get Latest Releases
 ```bash
-curl "https://6c277123.azure-local-releases-api.pages.dev/api/releases?limit=5"
+curl "https://phase-1.azure-local-releases-api.pages.dev/api/releases?limit=5"
 ```
 
 ### Get Supported Releases for New Deployments
 ```bash
-curl "https://6c277123.azure-local-releases-api.pages.dev/api/releases?supported=true&newDeployments=true"
+curl "https://phase-1.azure-local-releases-api.pages.dev/api/releases?supported=true&newDeployments=true"
 ```
 
 ### Get Specific Release Train
 ```bash
-curl "https://6c277123.azure-local-releases-api.pages.dev/api/releases?releaseTrain=2505"
+curl "https://phase-1.azure-local-releases-api.pages.dev/api/releases?releaseTrain=2505"
 ```
 
 ### Get Release Trains
 ```bash
-curl "https://6c277123.azure-local-releases-api.pages.dev/api/releasetrains"
+curl "https://phase-1.azure-local-releases-api.pages.dev/api/releasetrains"
 ```
 
 ## 🏗 Project Structure
@@ -236,10 +266,12 @@ azure-local-releases-api/
 - ✅ CORS support for cross-origin requests
 
 ### Data Processing
-- ✅ HTML parsing for release information (26 releases)
+- ✅ HTML parsing for release information (26 releases total)
+- ✅ **ENHANCED**: Complete "Older versions of Azure Local" table parsing
 - ✅ Markdown parsing for solution updates (3 solution updates)
 - ✅ Data transformation and enrichment
-- ✅ Support status calculation based on end-of-support dates
+- ✅ **IMPROVED**: Dynamic 180-day support status calculation
+- ✅ **NEW**: HTML tab-based new deployment detection
 - ✅ URL generation for Microsoft Learn documentation
 
 ### API Features
@@ -267,10 +299,11 @@ azure-local-releases-api/
 ## 🎯 Success Metrics
 
 ### Functional Requirements ✅
-- **Data Accuracy**: All 26 releases properly parsed and structured
+- **Data Accuracy**: All 26 releases properly parsed and structured (INCLUDING older versions)
 - **API Completeness**: Both endpoints fully functional with all specified parameters
-- **Performance**: Sub-second response times with caching
+- **Performance**: Sub-second response times with intelligent caching
 - **Reliability**: Robust error handling and fallback mechanisms
+- **Data Completeness**: Full historical coverage from 2311 to 2505 release trains
 
 ### Technical Requirements ✅
 - **Serverless Architecture**: Deployed on Cloudflare Pages Functions
@@ -278,12 +311,14 @@ azure-local-releases-api/
 - **Testing**: Comprehensive test coverage with automated testing
 - **Caching**: Intelligent caching strategy with TTL management
 - **CORS**: Cross-origin support for web applications
+- **Data Processing**: Advanced HTML parsing with multiple table support
 
 ### Operational Requirements ✅
 - **Deployment**: Live production deployment with working endpoints
 - **Documentation**: Complete API documentation and usage examples
 - **Monitoring**: Error tracking and performance monitoring
 - **Maintenance**: Automated data updates and cache management
+- **Data Accuracy**: Real-time support status with 180-day calculation windows
 
 ## 🔮 Future Enhancements (Phase 2)
 
@@ -314,12 +349,12 @@ azure-local-releases-api/
 ## 📞 Contact & Support
 
 For questions, issues, or feature requests:
-- **API Documentation**: https://6c277123.azure-local-releases-api.pages.dev/
+- **API Documentation**: https://phase-1.azure-local-releases-api.pages.dev/
 - **Source Code**: Available in workspace
 - **Issues**: Report via project management system
 
 ---
 
 **Project Status**: ✅ **PHASE 1 COMPLETE**  
-**Last Updated**: January 2025  
+**Last Updated**: May 2025  
 **Version**: 1.0.0
