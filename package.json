@@ -4,8 +4,10 @@
   "description": "API to retrieve information about Azure Local Releases",
   "main": "index.js",
   "scripts": {
-    "dev": "wrangler dev",
-    "deploy": "wrangler deploy",
+    "dev": "npx wrangler pages dev",
+    "deploy": "npx wrangler pages deploy",
+    "deploy:preview": "npm run build && npx wrangler pages deploy -e=preview --branch=preview",
+    "deploy:production": "npm run build && npx wrangler pages deploy -e=production",
     "build": "tsc",
     "test": "jest",
     "test:watch": "jest --watch"
