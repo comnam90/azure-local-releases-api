@@ -27,43 +27,77 @@ export class DataParser {
           const cells = $row.find('td');
           
           if (cells.length >= 4) {
-            const versionCell = $(cells[0]);
-            const osBuildCell = $(cells[1]);
-            const securityCell = $(cells[2]);
-            const whatsNewCell = $(cells[3]);
-            const knownIssuesCell = $(cells[4]);
-
-            // Extract version and availability date
-            const versionText = versionCell.text().trim();
-            const versionMatch = versionText.match(/^([^\s]+)/);
-            const dateMatch = versionText.match(/Availability date:\s*(\d{4}-\d{2}-\d{2})/);
-
-            if (versionMatch && dateMatch) {
-              const version = versionMatch[1];
-              const availabilityDate = dateMatch[1];
-              const osBuild = osBuildCell.text().trim();
-
-              // Extract URLs
-              const securityUrl = securityCell.find('a').attr('href') || '';
-              const whatsNewUrl = whatsNewCell.find('a').attr('href') || '';
-              const knownIssuesUrl = knownIssuesCell.find('a').attr('href') || '';
-
-              releases.push({
-                version,
-                osBuild,
-                availabilityDate,
-                securityUpdateUrl: DataParser.normalizeUrl(securityUrl),
-                whatsNewUrl: DataParser.normalizeUrl(whatsNewUrl),
-                knownIssuesUrl: DataParser.normalizeUrl(knownIssuesUrl),
-                newDeployments // Add the newDeployments flag based on which tab panel this came from
-              });
+            const releaseData = DataParser.extractReleaseFromRow($, cells, newDeployments);
+            if (releaseData) {
+              releases.push(releaseData);
             }
           }
         });
       }
     });
 
+    // Parse releases from the "Older versions of Azure Local" table
+    const olderVersionsHeading = $('#older-versions-of-azure-local');
+    if (olderVersionsHeading.length > 0) {
+      // Find the next table after the "Older versions" heading
+      const $olderTable = olderVersionsHeading.nextAll('table').first();
+      if ($olderTable.length > 0) {
+        const rows = $olderTable.find('tbody tr');
+        
+        rows.each((_: any, row: any) => {
+          const $row = $(row);
+          const cells = $row.find('td');
+          
+          if (cells.length >= 4) {
+            const releaseData = DataParser.extractReleaseFromRow($, cells, false); // older versions are existing deployments only
+            if (releaseData) {
+              releases.push(releaseData);
+            }
+          }
+        });
+      }
+    }
+
     return releases;
+  }
+
+  /**
+   * Extract release data from a table row
+   */
+  private static extractReleaseFromRow($: any, cells: any, newDeployments: boolean): ExternalReleaseData | null {
+    const versionCell = $(cells[0]);
+    const osBuildCell = $(cells[1]);
+    const securityCell = $(cells[2]);
+    const whatsNewCell = $(cells[3]);
+    const knownIssuesCell = $(cells[4]);
+
+    // Extract version and availability date
+    const versionText = versionCell.text().trim();
+    const versionMatch = versionText.match(/^([^\s]+)/);
+    const dateMatch = versionText.match(/Availability date:\s*(\d{4}-\d{2}-\d{2})/);
+
+    if (versionMatch && dateMatch) {
+      const version = versionMatch[1];
+      const availabilityDate = dateMatch[1];
+      const osBuild = osBuildCell.text().trim();
+
+      // Extract URLs
+      const securityUrl = securityCell.find('a').attr('href') || '';
+      const whatsNewUrl = whatsNewCell.find('a').attr('href') || '';
+      const knownIssuesUrl = knownIssuesCell.find('a').attr('href') || '';
+
+      return {
+        version,
+        osBuild,
+        availabilityDate,
+        securityUpdateUrl: DataParser.normalizeUrl(securityUrl),
+        whatsNewUrl: DataParser.normalizeUrl(whatsNewUrl),
+        knownIssuesUrl: DataParser.normalizeUrl(knownIssuesUrl),
+        newDeployments
+      };
+    }
+
+    return null;
   }
 
   /**
