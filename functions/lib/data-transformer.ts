@@ -74,22 +74,29 @@ export class DataTransformer {
    * Transform releases into release trains
    */
   static transformReleaseTrains(releases: Release[]): ReleaseTrain[] {
-    const trainMap = new Map<string, ReleaseTrain>();
+    const trainMap = new Map<string, { latestRelease: Release; supported: boolean }>();
 
+    // Find the latest release for each train and determine support status
     for (const release of releases) {
       if (!trainMap.has(release.releaseTrain)) {
         trainMap.set(release.releaseTrain, {
-          releaseTrain: release.releaseTrain,
+          latestRelease: release,
           supported: release.supported
         });
       } else {
-        // Update supported status if any release in the train is supported
         const existing = trainMap.get(release.releaseTrain)!;
-        existing.supported = existing.supported || release.supported;
+        // If this release is newer, update the latest release and support status
+        if (new Date(release.availabilityDate) > new Date(existing.latestRelease.availabilityDate)) {
+          existing.latestRelease = release;
+          existing.supported = release.supported;
+        }
       }
     }
 
-    return Array.from(trainMap.values()).sort((a, b) => 
+    return Array.from(trainMap.values()).map(({ latestRelease, supported }) => ({
+      releaseTrain: latestRelease.releaseTrain,
+      supported
+    })).sort((a, b) => 
       parseInt(b.releaseTrain) - parseInt(a.releaseTrain)
     );
   }
@@ -104,23 +111,9 @@ export class DataTransformer {
     const releaseDate = new Date(availabilityDate);
     const now = new Date();
     
-    // Azure Local 23H2 support ends on October 31, 2025
-    const endOfSupport23H2 = new Date('2025-10-31');
-    
-    // General rule: 6 months support window
-    const sixMonthsLater = new Date(releaseDate);
-    sixMonthsLater.setMonth(sixMonthsLater.getMonth() + 6);
-    
-    let endOfSupportDate: Date;
-    
-    // Determine end of support based on release train
-    if (parseInt(releaseTrain) <= 2509) {
-      // 23H2 releases end on October 31, 2025
-      endOfSupportDate = endOfSupport23H2;
-    } else {
-      // Future releases follow 6-month rule
-      endOfSupportDate = sixMonthsLater;
-    }
+    // Support window: 180 days from availability date
+    const endOfSupportDate = new Date(releaseDate);
+    endOfSupportDate.setDate(endOfSupportDate.getDate() + 180);
     
     const supported = now <= endOfSupportDate;
     
