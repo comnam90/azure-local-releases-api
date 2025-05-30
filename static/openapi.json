@@ -19,7 +19,7 @@
       "description": "Production API server"
     },
     {
-      "url": "http://phase-2.azure-local-releases-api.pages.dev",
+      "url": "https://phase-2.azure-local-releases-api.pages.dev",
       "description": "Phase 2 dev server"
     }
   ],
