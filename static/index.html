@@ -57,48 +57,176 @@
         .example a:hover {
             text-decoration: underline;
         }
+        .api-stats {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 2rem 0;
+            border: 1px solid #e9ecef;
+        }
+        .api-stats h3 {
+            margin-top: 0;
+            text-align: center;
+            color: #0078d4;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        .stat-item {
+            background: white;
+            padding: 1rem;
+            border-radius: 6px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #0078d4;
+            margin: 0;
+        }
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin: 0.25rem 0 0 0;
+        }
+        .quick-links {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 2rem 0;
+            border: 1px solid #e9ecef;
+        }
+        .quick-links h3 {
+            margin-top: 0;
+            text-align: center;
+            color: #0078d4;
+        }
+        .links-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+        .quick-links a {
+            background: #0078d4;
+            color: white;
+            padding: 0.75rem 1rem;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            transition: background-color 0.2s;
+            text-align: center;
+        }
+        .quick-links a:hover {
+            background: #106ebe;
+        }
+        .documentation-link {
+            text-align: center;
+            margin: 2rem 0;
+        }
+        .documentation-link a {
+            background: #28a745;
+            color: white;
+            padding: 1rem 2rem;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+        .documentation-link a:hover {
+            background: #218838;
+        }
     </style>
 </head>
 <body>
     <div class="header">
         <div class="logo">AL</div>
         <h1>Azure Local Releases API</h1>
-        <p>REST API for Azure Local release information with advanced filtering and caching</p>
+        <p>Comprehensive REST API for Azure Local release information with advanced filtering, support status tracking, and solution update management. Access 26+ releases across 8 release trains with real-time support calculations.</p>
     </div>
 
-    <div class="endpoint">
-        <h3>GET /api/releases</h3>
-        <p>Get Azure Local releases with optional filtering</p>
-        <p><strong>Query Parameters:</strong></p>
-        <ul>
-            <li><code>supported</code> - Filter by support status (true/false)</li>
-            <li><code>releaseTrain</code> - Filter by release train (e.g., 2411, 2505)</li>
-            <li><code>buildType</code> - Filter by build type (Feature, Cumulative)</li>
-            <li><code>limit</code> - Limit number of results</li>
-            <li><code>offset</code> - Offset for pagination</li>
-        </ul>
-        <div class="example">
-            <strong>Examples:</strong><br>
-            <a href="/api/releases">/api/releases</a> - All releases<br>
-            <a href="/api/releases?supported=true&limit=10">/api/releases?supported=true&limit=10</a> - Latest 10 supported releases<br>
-            <a href="/api/releases?releaseTrain=2505">/api/releases?releaseTrain=2505</a> - All releases from 2505 train
+    <div class="api-stats">
+        <h3>Live API Statistics</h3>
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-value" id="release-count">—</div>
+                <div class="stat-label">Total Releases</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="train-count">—</div>
+                <div class="stat-label">Release Trains</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="supported-count">—</div>
+                <div class="stat-label">Currently Supported</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">2</div>
+                <div class="stat-label">API Endpoints</div>
+            </div>
         </div>
     </div>
 
-    <div class="endpoint">
-        <h3>GET /api/releasetrains</h3>
-        <p>Get Azure Local release trains information</p>
-        <p><strong>Query Parameters:</strong></p>
-        <ul>
-            <li><code>supported</code> - Filter by support status (true/false)</li>
-            <li><code>limit</code> - Limit number of results</li>
-            <li><code>offset</code> - Offset for pagination</li>
-        </ul>
-        <div class="example">
-            <strong>Examples:</strong><br>
-            <a href="/api/releasetrains">/api/releasetrains</a> - All release trains<br>
-            <a href="/api/releasetrains?supported=true">/api/releasetrains?supported=true</a> - Supported release trains
+    <script>
+        // Fetch live statistics from the API
+        async function loadStats() {
+            try {
+                // Get releases data
+                const releasesResponse = await fetch('/api/releases');
+                const releasesData = await releasesResponse.json();
+                
+                // Get release trains data
+                const trainsResponse = await fetch('/api/releasetrains');
+                const trainsData = await trainsResponse.json();
+                
+                // Get supported releases
+                const supportedResponse = await fetch('/api/releases?supported=true');
+                const supportedData = await supportedResponse.json();
+                
+                // Update the statistics
+                document.getElementById('release-count').textContent = releasesData.pagination.total;
+                document.getElementById('train-count').textContent = trainsData.pagination.total;
+                document.getElementById('supported-count').textContent = supportedData.pagination.total;
+                
+            } catch (error) {
+                console.error('Error loading statistics:', error);
+                // Keep default values if API fails
+            }
+        }
+        
+        // Load stats when page loads
+        document.addEventListener('DOMContentLoaded', loadStats);
+    </script>
+
+    <div class="quick-links">
+        <h3>Quick API Examples</h3>
+        <div class="links-grid">
+            <a href="/api/releases?latest=true" target="_blank">Latest Releases</a>
+            <a href="/api/releases?supported=true" target="_blank">Supported Releases</a>
+            <a href="/api/releases?buildType=Feature" target="_blank">Feature Builds</a>
+            <a href="/api/releases?newDeployments=true" target="_blank">New Deployment Compatible</a>
+            <a href="/api/releases?solutionUpdate=true" target="_blank">With Solution Updates</a>
+            <a href="/api/releasetrains" target="_blank">All Release Trains</a>
         </div>
+    </div>
+
+    <div class="documentation-link">
+        <a href="/api">📖 Interactive API Documentation</a>
+    </div>
+
+    <div class="endpoint">
+        <h3>API Overview</h3>
+        <p>The Azure Local Releases API provides two main endpoints:</p>
+        <ul>
+            <li><strong>/api/releases</strong> - Access release information with advanced filtering by support status, release train, build type, and more</li>
+            <li><strong>/api/releasetrains</strong> - Get release train metadata and status information</li>
+        </ul>
+        <p>Both endpoints support pagination and flexible filtering options. For complete parameter documentation and to test the API interactively, visit the <a href="/api">interactive documentation</a>.</p>
     </div>
 
     <div style="text-align: center; margin-top: 2rem; color: #666;">
