@@ -167,17 +167,40 @@ export class DataTransformer {
     const featureBuilds = new Set<string>();
     const trainMap = new Map<string, ExternalReleaseData>();
 
-    // Find the earliest release in each release train
+    // Find the correct Feature build for each release train
     for (const release of releaseData) {
       const releaseTrain = DataParser.extractReleaseTrain(release.version);
       const existing = trainMap.get(releaseTrain);
       
-      if (!existing || new Date(release.availabilityDate) < new Date(existing.availabilityDate)) {
+      if (!existing) {
         trainMap.set(releaseTrain, release);
+      } else {
+        // Compare to find the correct Feature build
+        const releaseDate = new Date(release.availabilityDate);
+        const existingDate = new Date(existing.availabilityDate);
+        
+        // If dates are different, pick the earlier one
+        if (releaseDate < existingDate) {
+          trainMap.set(releaseTrain, release);
+        } else if (releaseDate.getTime() === existingDate.getTime()) {
+          // If dates are the same, prefer newDeployments version for newer trains (2504+)
+          const trainNumber = parseInt(releaseTrain);
+          if (trainNumber >= 2504) {
+            // For newer trains, prefer the version that supports new deployments
+            if (release.newDeployments && !existing.newDeployments) {
+              trainMap.set(releaseTrain, release);
+            }
+          } else {
+            // For older trains, prefer the version that doesn't support new deployments
+            if (!release.newDeployments && existing.newDeployments) {
+              trainMap.set(releaseTrain, release);
+            }
+          }
+        }
       }
     }
 
-    // Mark the earliest release in each train as a Feature build
+    // Mark the selected release in each train as a Feature build
     for (const release of trainMap.values()) {
       featureBuilds.add(release.version);
     }
