@@ -9,18 +9,18 @@
     "version": "1.0.0",
     "description": "A comprehensive REST API for retrieving Azure Local release information, including versions, support status, deployment compatibility, and solution updates. This API aggregates data from Microsoft documentation and provides advanced filtering capabilities for programmatic access to Azure Local release data.",
     "contact": {
-      "name": "erikgraa",
-      "url": "https://github.com/erikgraa"
+      "name": "Ben Thomas",
+      "url": "https://bcthomas.com"
     }
   },
   "servers": [
     {
-      "url": "https://phase-1.azure-local-releases-api.pages.dev",
+      "url": "https://azure-local-releases-api.pages.dev",
       "description": "Production API server"
     },
     {
-      "url": "http://localhost:8788",
-      "description": "Local development server"
+      "url": "http://phase-2.azure-local-releases-api.pages.dev",
+      "description": "Phase 2 dev server"
     }
   ],
   "tags": [
