@@ -161,50 +161,44 @@ export class DataTransformer {
   }
 
   /**
-   * Determine which releases are Feature builds (first in each release train)
+   * Determine which releases are Feature builds (first in each release train per OS version)
    */
   static determineFeatureBuilds(releaseData: ExternalReleaseData[]): Set<string> {
     const featureBuilds = new Set<string>();
-    const trainMap = new Map<string, ExternalReleaseData>();
+    const trainOsMap = new Map<string, ExternalReleaseData>();
 
-    // Find the correct Feature build for each release train
+    // Find the first release for each release train + OS version combination
     for (const release of releaseData) {
       const releaseTrain = DataParser.extractReleaseTrain(release.version);
-      const existing = trainMap.get(releaseTrain);
+      const osVersion = DataTransformer.extractOsVersion(release.version);
+      const key = `${releaseTrain}-${osVersion}`; // e.g., "2504-12" or "2411-10"
+      
+      const existing = trainOsMap.get(key);
       
       if (!existing) {
-        trainMap.set(releaseTrain, release);
+        trainOsMap.set(key, release);
       } else {
-        // Compare to find the correct Feature build
-        const releaseDate = new Date(release.availabilityDate);
-        const existingDate = new Date(existing.availabilityDate);
-        
-        // If dates are different, pick the earlier one
-        if (releaseDate < existingDate) {
-          trainMap.set(releaseTrain, release);
-        } else if (releaseDate.getTime() === existingDate.getTime()) {
-          // If dates are the same, prefer newDeployments version for newer trains (2504+)
-          const trainNumber = parseInt(releaseTrain);
-          if (trainNumber >= 2504) {
-            // For newer trains, prefer the version that supports new deployments
-            if (release.newDeployments && !existing.newDeployments) {
-              trainMap.set(releaseTrain, release);
-            }
-          } else {
-            // For older trains, prefer the version that doesn't support new deployments
-            if (!release.newDeployments && existing.newDeployments) {
-              trainMap.set(releaseTrain, release);
-            }
-          }
+        // Pick the earliest release for this train+OS combination
+        if (new Date(release.availabilityDate) < new Date(existing.availabilityDate)) {
+          trainOsMap.set(key, release);
         }
       }
     }
 
-    // Mark the selected release in each train as a Feature build
-    for (const release of trainMap.values()) {
+    // Mark all selected releases as Feature builds
+    for (const release of trainOsMap.values()) {
       featureBuilds.add(release.version);
     }
 
     return featureBuilds;
+  }
+
+  /**
+   * Extract OS version from full version string
+   */
+  private static extractOsVersion(version: string): string {
+    // Extract the first part: "10.2504.1001.20" -> "10"
+    const match = version.match(/^(\d+)\./);
+    return match ? match[1] : '';
   }
 }
