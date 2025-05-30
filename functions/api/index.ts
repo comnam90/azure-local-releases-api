@@ -11,13 +11,261 @@ export async function onRequest(context: { request: Request; env: any }) {
   // Serve the API documentation HTML
   if (url.pathname === '/api/' || url.pathname === '/api/index.html') {
     try {
-      // Read the API documentation HTML file
-      const apiHtml = await fetch(new URL('/api.html', url.origin));
-      if (!apiHtml.ok) {
-        throw new Error('API documentation not found');
-      }
+      // Serve the documentation HTML directly
+      const apiDocumentationHtml = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Azure Local Releases API - Documentation</title>
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@5.10.3/swagger-ui.css" />
+    <style>
+        html {
+            box-sizing: border-box;
+            overflow: -moz-scrollbars-vertical;
+            overflow-y: scroll;
+        }
+
+        *, *:before, *:after {
+            box-sizing: inherit;
+        }
+
+        body {
+            margin: 0;
+            background: #fafafa;
+        }
+
+        .swagger-ui .topbar {
+            background-color: #0078d4;
+        }
+
+        .swagger-ui .topbar .download-url-wrapper {
+            display: none;
+        }
+
+        .header-info {
+            background: linear-gradient(135deg, #0078d4 0%, #106ebe 100%);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            margin-bottom: 0;
+        }
+
+        .header-info h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 2.5rem;
+            font-weight: 300;
+        }
+
+        .header-info p {
+            margin: 0;
+            font-size: 1.1rem;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .api-stats {
+            background: #f8f9fa;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid #e9ecef;
+            text-align: center;
+        }
+
+        .api-stats .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .api-stats .stat-item {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .api-stats .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #0078d4;
+            margin: 0;
+        }
+
+        .api-stats .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin: 0.25rem 0 0 0;
+        }
+
+        .quick-links {
+            background: white;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid #e9ecef;
+            text-align: center;
+        }
+
+        .quick-links h3 {
+            margin: 0 0 1rem 0;
+            color: #333;
+        }
+
+        .quick-links .links-grid {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .quick-links a {
+            background: #0078d4;
+            color: white;
+            padding: 0.5rem 1rem;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            transition: background-color 0.2s;
+        }
+
+        .quick-links a:hover {
+            background: #106ebe;
+        }
+
+        #swagger-ui {
+            max-width: none;
+        }
+
+        /* Custom styles for better mobile experience */
+        @media (max-width: 768px) {
+            .header-info h1 {
+                font-size: 2rem;
+            }
+            
+            .header-info p {
+                padding: 0 1rem;
+            }
+            
+            .api-stats {
+                padding: 1rem;
+            }
+            
+            .quick-links {
+                padding: 1rem;
+            }
+            
+            .quick-links .links-grid {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header-info">
+        <h1>Azure Local Releases API</h1>
+        <p>Comprehensive REST API for Azure Local release information with advanced filtering, support status tracking, and solution update management. Access 26+ releases across 8 release trains with real-time support calculations.</p>
+    </div>
+
+    <div class="api-stats">
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-value" id="release-count">26</div>
+                <div class="stat-label">Total Releases</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="train-count">8</div>
+                <div class="stat-label">Release Trains</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="supported-count">—</div>
+                <div class="stat-label">Currently Supported</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">2</div>
+                <div class="stat-label">API Endpoints</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="quick-links">
+        <h3>Quick API Examples</h3>
+        <div class="links-grid">
+            <a href="/api/releases?latest=true" target="_blank">Latest Releases</a>
+            <a href="/api/releases?supported=true" target="_blank">Supported Releases</a>
+            <a href="/api/releases?buildType=Feature" target="_blank">Feature Builds</a>
+            <a href="/api/releases?newDeployments=true" target="_blank">New Deployment Compatible</a>
+            <a href="/api/releases?solutionUpdate=true" target="_blank">With Solution Updates</a>
+            <a href="/api/releasetrains" target="_blank">All Release Trains</a>
+        </div>
+    </div>
+
+    <div id="swagger-ui"></div>
+
+    <script src="https://unpkg.com/swagger-ui-dist@5.10.3/swagger-ui-bundle.js"></script>
+    <script src="https://unpkg.com/swagger-ui-dist@5.10.3/swagger-ui-standalone-preset.js"></script>
+    <script>
+        window.onload = function() {
+            // Initialize Swagger UI
+            const ui = SwaggerUIBundle({
+                url: '/openapi.json',
+                dom_id: '#swagger-ui',
+                deepLinking: true,
+                presets: [
+                    SwaggerUIBundle.presets.apis,
+                    SwaggerUIStandalonePreset
+                ],
+                plugins: [
+                    SwaggerUIBundle.plugins.DownloadUrl
+                ],
+                layout: "StandaloneLayout",
+                tryItOutEnabled: true,
+                filter: true,
+                displayRequestDuration: true,
+                docExpansion: "list",
+                defaultModelsExpandDepth: 2,
+                displayOperationId: false,
+                supportedSubmitMethods: ['get'],
+                validatorUrl: null, // Disable validator badge
+                onComplete: function() {
+                    // Load live stats from API
+                    loadApiStats();
+                }
+            });
+
+            // Function to load live API statistics
+            async function loadApiStats() {
+                try {
+                    // Get all releases to count totals
+                    const releasesResponse = await fetch('/api/releases');
+                    const releasesData = await releasesResponse.json();
+                    
+                    // Get supported releases count
+                    const supportedResponse = await fetch('/api/releases?supported=true');
+                    const supportedData = await supportedResponse.json();
+                    
+                    // Get release trains
+                    const trainsResponse = await fetch('/api/releasetrains');
+                    const trainsData = await trainsResponse.json();
+                    
+                    // Update stats display
+                    document.getElementById('release-count').textContent = releasesData.releases.length;
+                    document.getElementById('train-count').textContent = trainsData.releaseTrains.length;
+                    document.getElementById('supported-count').textContent = supportedData.releases.length;
+                    
+                } catch (error) {
+                    console.warn('Failed to load live API stats:', error);
+                    // Keep default values if API is not available
+                }
+            }
+        };
+    </script>
+</body>
+</html>`;
       
-      return new Response(await apiHtml.text(), {
+      return new Response(apiDocumentationHtml, {
         headers: {
           'Content-Type': 'text/html; charset=utf-8',
           'Cache-Control': 'public, max-age=3600',
