@@ -189,9 +189,9 @@
                 const supportedData = await supportedResponse.json();
                 
                 // Update the statistics
-                document.getElementById('release-count').textContent = releasesData.pagination.total;
-                document.getElementById('train-count').textContent = trainsData.pagination.total;
-                document.getElementById('supported-count').textContent = supportedData.pagination.total;
+                document.getElementById('release-count').textContent = releasesData.releases.length;
+                document.getElementById('train-count').textContent = trainsData.releaseTrains.length;
+                document.getElementById('supported-count').textContent = supportedData.releases.length;
                 
             } catch (error) {
                 console.error('Error loading statistics:', error);
