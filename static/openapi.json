@@ -47,8 +47,7 @@
             "required": false,
             "schema": {
               "type": "boolean"
-            },
-            "example": true
+            }
           },
           {
             "name": "releaseTrain",
@@ -58,8 +57,7 @@
             "schema": {
               "type": "string",
               "pattern": "^[0-9]{4}$"
-            },
-            "example": "2505"
+            }
           },
           {
             "name": "baselineRelease",
@@ -68,8 +66,7 @@
             "required": false,
             "schema": {
               "type": "boolean"
-            },
-            "example": true
+            }
           },
           {
             "name": "buildType",
@@ -79,8 +76,7 @@
             "schema": {
               "type": "string",
               "enum": ["Feature", "Cumulative"]
-            },
-            "example": "Feature"
+            }
           },
           {
             "name": "version",
@@ -89,18 +85,16 @@
             "required": false,
             "schema": {
               "type": "string"
-            },
-            "example": "11.2505.1001.22"
+            }
           },
           {
             "name": "osBuild",
             "in": "query",
-            "description": "Filter by OS build number",
+            "description": "Filter by OS build number (eg. 25398.1611)",
             "required": false,
             "schema": {
               "type": "string"
-            },
-            "example": "25398.1611"
+            }
           },
           {
             "name": "newDeployments",
@@ -109,8 +103,7 @@
             "required": false,
             "schema": {
               "type": "boolean"
-            },
-            "example": true
+            }
           },
           {
             "name": "solutionUpdate",
@@ -119,8 +112,7 @@
             "required": false,
             "schema": {
               "type": "boolean"
-            },
-            "example": true
+            }
           },
           {
             "name": "latest",
@@ -129,8 +121,7 @@
             "required": false,
             "schema": {
               "type": "boolean"
-            },
-            "example": true
+            }
           }
         ],
         "responses": {
