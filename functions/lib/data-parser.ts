@@ -10,50 +10,57 @@ export class DataParser {
     const $ = cheerio.load(html);
     const releases: ExternalReleaseData[] = [];
 
-    // Find both "Existing deployments" and "New deployments" tables
-    const tables = $('table');
-    
-    tables.each((_: any, table: any) => {
-      const $table = $(table);
-      const rows = $table.find('tbody tr');
-      
-      rows.each((_: any, row: any) => {
-        const $row = $(row);
-        const cells = $row.find('td');
+    // Parse releases from both "Existing deployments" and "New deployments" tab panels
+    const tabPanels = [
+      { selector: '#tabpanel_1_existing-deployments', newDeployments: false },
+      { selector: '#tabpanel_1_new-deployments', newDeployments: true }
+    ];
+
+    tabPanels.forEach(({ selector, newDeployments }) => {
+      const $tabPanel = $(selector);
+      if ($tabPanel.length > 0) {
+        const $table = $tabPanel.find('table');
+        const rows = $table.find('tbody tr');
         
-        if (cells.length >= 4) {
-          const versionCell = $(cells[0]);
-          const osBuildCell = $(cells[1]);
-          const securityCell = $(cells[2]);
-          const whatsNewCell = $(cells[3]);
-          const knownIssuesCell = $(cells[4]);
+        rows.each((_: any, row: any) => {
+          const $row = $(row);
+          const cells = $row.find('td');
+          
+          if (cells.length >= 4) {
+            const versionCell = $(cells[0]);
+            const osBuildCell = $(cells[1]);
+            const securityCell = $(cells[2]);
+            const whatsNewCell = $(cells[3]);
+            const knownIssuesCell = $(cells[4]);
 
-          // Extract version and availability date
-          const versionText = versionCell.text().trim();
-          const versionMatch = versionText.match(/^([^\s]+)/);
-          const dateMatch = versionText.match(/Availability date:\s*(\d{4}-\d{2}-\d{2})/);
+            // Extract version and availability date
+            const versionText = versionCell.text().trim();
+            const versionMatch = versionText.match(/^([^\s]+)/);
+            const dateMatch = versionText.match(/Availability date:\s*(\d{4}-\d{2}-\d{2})/);
 
-          if (versionMatch && dateMatch) {
-            const version = versionMatch[1];
-            const availabilityDate = dateMatch[1];
-            const osBuild = osBuildCell.text().trim();
+            if (versionMatch && dateMatch) {
+              const version = versionMatch[1];
+              const availabilityDate = dateMatch[1];
+              const osBuild = osBuildCell.text().trim();
 
-            // Extract URLs
-            const securityUrl = securityCell.find('a').attr('href') || '';
-            const whatsNewUrl = whatsNewCell.find('a').attr('href') || '';
-            const knownIssuesUrl = knownIssuesCell.find('a').attr('href') || '';
+              // Extract URLs
+              const securityUrl = securityCell.find('a').attr('href') || '';
+              const whatsNewUrl = whatsNewCell.find('a').attr('href') || '';
+              const knownIssuesUrl = knownIssuesCell.find('a').attr('href') || '';
 
-            releases.push({
-              version,
-              osBuild,
-              availabilityDate,
-              securityUpdateUrl: DataParser.normalizeUrl(securityUrl),
-              whatsNewUrl: DataParser.normalizeUrl(whatsNewUrl),
-              knownIssuesUrl: DataParser.normalizeUrl(knownIssuesUrl)
-            });
+              releases.push({
+                version,
+                osBuild,
+                availabilityDate,
+                securityUpdateUrl: DataParser.normalizeUrl(securityUrl),
+                whatsNewUrl: DataParser.normalizeUrl(whatsNewUrl),
+                knownIssuesUrl: DataParser.normalizeUrl(knownIssuesUrl),
+                newDeployments // Add the newDeployments flag based on which tab panel this came from
+              });
+            }
           }
-        }
-      });
+        });
+      }
     });
 
     return releases;
@@ -156,12 +163,25 @@ export class DataParser {
   }
 
   /**
-   * Determine if a release is a baseline release (can be used for new deployments)
+   * Determine if a release supports new deployments (deprecated - now determined from HTML tab sections)
+   */
+  static supportsNewDeployments(version: string): boolean {
+    // This method is deprecated - newDeployments is now determined 
+    // from which tab section the release appears in on the Microsoft docs page
+    return version.startsWith('12.');
+  }
+
+  /**
+   * Determine if a release is a baseline release
    */
   static isBaselineRelease(version: string): boolean {
-    // Baseline releases typically have specific patterns
-    // Based on the example data, versions like "12.2504.1001.20" are baseline releases
-    return version.startsWith('12.') || version.includes('.1001.');
+    // Baseline releases have specific patterns - they contain .1001. or are baseline builds
+    // Based on expected output, this includes versions with .1001. and certain other patterns
+    return version.includes('.1001.') || 
+           version.includes('.0.') ||
+           version.includes('.1.') ||
+           version.includes('.2.') ||
+           version.includes('.3.');
   }
 
   /**

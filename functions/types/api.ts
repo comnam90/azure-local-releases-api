@@ -67,6 +67,7 @@ export interface ExternalReleaseData {
   securityUpdateUrl: string;
   whatsNewUrl: string;
   knownIssuesUrl: string;
+  newDeployments: boolean;
 }
 
 export interface ExternalSolutionUpdateData {

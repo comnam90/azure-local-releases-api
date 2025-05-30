@@ -21,11 +21,11 @@ export class DataTransformer {
       const releaseVersion = DataParser.extractRelease(release.version);
       const releaseShortened = DataParser.extractReleaseShortened(release.version);
       
-      // Determine if this is for new deployments
-      const newDeployments = DataParser.isBaselineRelease(release.version);
+      // Use the newDeployments flag from the parsed data (based on tab section)
+      const newDeployments = release.newDeployments;
       
       // Determine baseline release status
-      const baselineRelease = newDeployments;
+      const baselineRelease = DataParser.isBaselineRelease(release.version);
       
       // Determine build type
       const buildType = DataParser.getBuildType(release.version);
